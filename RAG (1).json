@@ -1,0 +1,868 @@
+{
+  "name": "RAG",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        3968,
+        864
+      ],
+      "id": "97ec6eac-0019-4d07-8584-68926c7bdcf3",
+      "name": "RSS Read3"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4192,
+        832
+      ],
+      "id": "bff581f4-2f25-44d7-99a4-65de3c1a3cf3",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e8ce11d2-e2c4-4707-80d1-caf9525645c6",
+              "leftValue": "={{ $json.pubDate.toDateTime().toISO() }}",
+              "rightValue": "={{ $now.minus({ days: 1 }).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        4464,
+        864
+      ],
+      "id": "08813a73-2939-4128-b2d4-065d1940b05f",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        3984,
+        528
+      ],
+      "id": "3a50c775-aafe-41b4-acee-a65b5c1e67ae",
+      "name": "RSS Read4"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        3472,
+        704
+      ],
+      "id": "a7c42caa-fe24-4b28-9339-a48c8ec59ded",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3744,
+        864
+      ],
+      "id": "a8c1fa26-d1fd-472e-9dd3-1c291dbc7f7d",
+      "name": "No Operation, do nothing1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        3968,
+        1248
+      ],
+      "id": "65b2da99-adc5-4b60-9259-be21ae7848d2",
+      "name": "RSS Read2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json.data.toJsonString()}}",
+        "options": {
+          "systemMessage": "You are an AI news podcast scriptwriter.\n\nYour job:\n- You receive, as input, a LIST of articles coming from RSS feeds.\n- Each article may include fields like: title, source, publishedAt/date, link/url, description and/or full content.\n- Based ONLY on this list, you must write ONE single, coherent podcast script that a text‑to‑speech engine will read aloud.\n\nRules for how to write the script:\n1. Style & tone\n   - Use a friendly, clear, conversational tone, like a human podcast host.\n   - Speak in the first person plural or neutral host voice, e.g. “Let’s look at today’s AI news…”.\n   - Avoid jargon where possible; briefly explain technical terms.\n\n2. Structure\n   - Start with a short intro (1–3 sentences) that mentions it’s an AI/tech news update and that it’s a summary of recent stories.\n   - Then cover each article as a short news item:\n        - Mention the title or a short rephrased title.\n        - Optionally mention the source (e.g. “According to TechCrunch…”).\n        - Summarize the core point of the article in 2–4 simple sentences.\n   - If there are many articles:\n        - Prioritize the 5–10 most important or most recent ones.\n        - You MAY briefly group related stories together (for example: several stories about the same company or topic).\n   - End with a short closing (1–2 sentences), e.g. “That’s it for today’s AI update. Thanks for listening.”\n\n3. Content constraints\n   - DO NOT output any bullet points, numbered lists, headings, Markdown, or code.\n   - The output must be plain text, ready for text‑to‑speech, with normal sentences and paragraph breaks only.\n   - Do not include the raw URLs unless they are useful in a natural spoken way (for example: “You can read more on the official site.” without saying the full link).\n   - Do not say anything about JSON, lists, fields, or “RSS feed” in the final script. The listener should feel it’s a normal podcast, not an automated summary.\n   - If more than 10 articles are provided, choose and summarize the 10 most recent or newsworthy ones and ignore the rest.\n   - Try to keep the entire script under about 900 words so it fits into a short news podcast.\n\n4. Edge cases\n   - If the incoming list is empty or all items are unusable, output a short script saying there are no new AI/tech stories today, but keep the friendly podcast tone.\n\nYour final output must be ONLY the finished podcast script text following the rules above.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        4928,
+        864
+      ],
+      "id": "344f6791-506e-47df-af7d-f46eea0556fe",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        4864,
+        1088
+      ],
+      "id": "7e3a3e8e-54c9-4f83-9dd9-0af41c5ef21a",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=whatsapp:+YOUR_PHONE_NUMBER",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        4992,
+        1088
+      ],
+      "id": "946b9288-40f7-4403-994e-05a2c372d5a6",
+      "name": "Postgres Chat Memory1",
+      "credentials": {
+        "postgres": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        4640,
+        864
+      ],
+      "id": "66854edf-b4f8-41d9-b7fe-403333d34ccd",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.output }}",
+        "voiceId": {
+          "__rl": true,
+          "value": "en-US-alina",
+          "mode": "list",
+          "cachedResultName": "Alina (F)"
+        },
+        "multiNativeLocale": {
+          "__rl": true,
+          "value": "en-US",
+          "mode": "list",
+          "cachedResultName": "English (US & Canada)"
+        },
+        "style": {
+          "__rl": true,
+          "value": "Conversational",
+          "mode": "list",
+          "cachedResultName": "Conversational"
+        },
+        "format": "MP3",
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-murf.murf",
+      "typeVersion": 1,
+      "position": [
+        5808,
+        864
+      ],
+      "id": "cf698eec-482c-47a3-80e0-dd6ba4def9b4",
+      "name": "Generate speech from text",
+      "credentials": {
+        "murfApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        5552,
+        720
+      ],
+      "id": "00502312-352b-43e6-83c4-e589a0c33de0",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-light-v2.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        5360,
+        720
+      ],
+      "id": "b9d7c71e-2c37-40ae-8b88-aeae1c061a78",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        5328,
+        560
+      ],
+      "id": "dc1df8bf-4090-41a5-8401-86c9a718ea5d",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-light-v2.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        5200,
+        1296
+      ],
+      "id": "fbea5b6b-1e3f-4641-9412-ca3f8e5d9870",
+      "name": "Embeddings Cohere1",
+      "credentials": {
+        "cohereApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "call this tool to look up integration docx to get proper contextD",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "topK": 10,
+        "options": {
+          "queryName": "=match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        5120,
+        1088
+      ],
+      "id": "752d1cb2-a085-4734-8230-c74d80899910",
+      "name": "DOCUMENT",
+      "credentials": {
+        "supabaseApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.wired.com/feed/tag/ai/latest/rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        3968,
+        672
+      ],
+      "id": "441a549c-4d9f-4e06-a312-e86c2449ab5b",
+      "name": "RSS Read5"
+    },
+    {
+      "parameters": {
+        "url": "https://www.artificial-intelligence.blog/ai-news?format=rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        3968,
+        1056
+      ],
+      "id": "fb7924f9-b415-4075-a33b-5445854e94e6",
+      "name": "RSS Read6"
+    },
+    {
+      "parameters": {
+        "content": "## DailyAI Voice\nDailyAI Voice is an automated AI podcaster that gathers the latest tech and AI news from trusted sources\n, summarizes them, and delivers a clean, easy-to-listen audio briefing straight to your whatsapp inbox.",
+        "height": 1296,
+        "width": 3136
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3376,
+        256
+      ],
+      "id": "8b7ce931-0152-460f-865a-bb5b1318bdc7",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Here are solid AI + tech RSS feeds",
+        "height": 1056,
+        "width": 656,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3728,
+        432
+      ],
+      "id": "b494310c-f951-41e2-92ae-a42d3a0847a7",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## AI agent who act as AI news podcast scriptwriter",
+        "height": 1008,
+        "width": 864,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4800,
+        432
+      ],
+      "id": "39516f5d-2618-42ac-bb3a-cef34cda4f96",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/YOUR_ACCOUNT_SID/Messages.json",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "authorization",
+              "value": "Basic YOUR_AUTH_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "To",
+              "value": "whatsapp:+YOUR_PHONE_NUMBER"
+            },
+            {
+              "name": "From",
+              "value": "whatsapp:+YOUR_TWILIO_NUMBER"
+            },
+            {
+              "name": "Body",
+              "value": "Here is your voice note"
+            },
+            {
+              "name": "MediaUrl",
+              "value": "={{ $json.audioFile }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6272,
+        672
+      ],
+      "id": "87fec589-a570-48ae-9746-361ed7d216d7",
+      "name": "whatsapp trigger"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "com.twilio.messaging.inbound-message.received"
+        ]
+      },
+      "type": "n8n-nodes-base.twilioTrigger",
+      "typeVersion": 1,
+      "position": [
+        3440,
+        1056
+      ],
+      "id": "54c39f6a-f086-43f0-b0c8-2fe23a28f614",
+      "name": "Twilio Trigger",
+      "webhookId": "",
+      "credentials": {
+        "twilioApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "vvv",
+        "to": "v",
+        "message": "v",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        6272,
+        1104
+      ],
+      "id": "d1c45668-65c1-47d5-88ee-ea0743a1881e",
+      "name": "Send an SMS/MMS/WhatsApp message",
+      "credentials": {
+        "twilioApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 784,
+        "width": 704,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5744,
+        592
+      ],
+      "id": "b47b23c4-b64f-4690-b25e-91d7c5239621",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "64e77fba-4d5a-4b39-a076-3508148bf708"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "send audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1aca7f1c-6ecf-4e78-ad98-16be7e23394c",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "reply query"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        5968,
+        864
+      ],
+      "id": "8487da2e-a3e2-47ae-a0ad-bec6497dc443",
+      "name": "Switch"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RSS Read3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        [
+          {
+            "node": "RSS Read4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read5",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Generate speech from text",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate speech from text": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "DOCUMENT",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DOCUMENT": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read5": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "RSS Read6": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "whatsapp trigger": {
+      "main": [
+        []
+      ]
+    },
+    "Twilio Trigger": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "whatsapp trigger",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send an SMS/MMS/WhatsApp message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "433ac856-e27d-45b6-8312-5a4ca3b9c811",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": ""
+  },
+  "id": "2wFg5geiuWjk9Ry9",
+  "tags": [
+    {
+      "createdAt": "2025-10-19T17:00:37.046Z",
+      "updatedAt": "2025-10-19T17:00:37.046Z",
+      "id": "NXkqhgD6tnYFl77F",
+      "name": "shrestha"
+    }
+  ]
+}
